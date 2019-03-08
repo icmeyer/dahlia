@@ -1,5 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rc
+
+font = {'weight' : 'bold',
+        'size'   : 13}
+rc('font', **font)
+rc('text', usetex=True)
+
 
 def concentration_plot(isotopes, time, steps, conc_over_time, title):
         times = np.linspace(0, time, steps)
@@ -24,6 +31,7 @@ def concentration_subplot(isotopes, time, steps, conc_over_time, title):
         plot_axes = {}
         plot_legends = {}
         count = 0
+        # fig, axarr = plt.subplots(int(n_plots/2), 2)
         for letter in iso_one_letter:
             count += 1
             plot_axes[letter] = plt.subplot(int(n_plots/2), 2, count)
@@ -55,13 +63,13 @@ def flux_k_plot(time, steps, fluxes, ks):
     plt.plot(times[1:], fluxes)
     plt.grid(True)
     plt.xlabel('Time (y)')
-    plt.ylabel('Flux (n/cm^2/s)')
+    plt.ylabel('$\phi$ $(n/cm^2/s)$')
 
     plt.subplot(2,1,2)
     plt.plot(times[:], ks)
     plt.grid(True)
     plt.xlabel('Time (y)')
-    plt.ylabel('k_inf')
+    plt.ylabel('$k_{\inf}$')
     plt.show()
 
 def convergence_plot(isotopes, time_steps, final_concs):

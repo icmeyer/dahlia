@@ -30,15 +30,17 @@ def main_function(isotopes, conc, flux, reactor_type, years, steps,
     flux_depletion = calc_flux_depletion(isotopes, flux, DATA)
     print('Flux depletion matrix')
     print(flux_depletion)
-    # plt.spy(flux_depletion)
-    # plt.title('flux depletion')
-    # plt.show()
     
     decay_depletion = calc_decay_depletion(isotopes, DATA)
-    print('Decay depletion matrix')
+    print('Decay Depletion matrix')
     print(decay_depletion)
+
+    # plt.subplot(121)
+    # plt.spy(flux_depletion)
+    # plt.title('Flux Depletion')
+    # plt.subplot(122)
     # plt.spy(decay_depletion)
-    # plt.title('decay depletion')
+    # plt.title('Decay Depletion')
     # plt.show()
 
     # print('By half-life')
@@ -184,44 +186,32 @@ def evaluate_kinf(isotopes, conc, DATA, reactor_type):
         if reactor_type == 'thermal':
             if iso == '922350':
                 fis_xs = DATA[iso]['fis']*1e-24
-                abs_xs = DATA[iso]['cap']*1e-24 + fis_xs
                 macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
-                macro_abs = abs_xs*conc[i]/nucname.anum(iso)*MOL
 
                 nubar = 2.4
                 numerator += nubar*macro_fis
-                denom += macro_abs
 
             elif iso == '942390':
                 fis_xs = DATA[iso]['fis']*1e-24
-                abs_xs = DATA[iso]['cap']*1e-24 + fis_xs
                 macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
-                macro_abs = abs_xs*conc[i]/nucname.anum(iso)*MOL
 
                 nubar = 2.9
                 numerator += nubar*macro_fis
-                denom += macro_abs
 
         elif reactor_type == 'fast':
             if iso == '922350' or iso =='922380':
                 fis_xs = DATA[iso]['fis']*1e-24
-                abs_xs = DATA[iso]['cap']*1e-24 + fis_xs
                 macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
-                macro_abs = abs_xs*conc[i]/nucname.anum(iso)*MOL
 
                 nubar = 2.6
                 numerator += nubar*macro_fis
-                denom += macro_abs
 
             elif iso == '942390':
                 fis_xs = DATA[iso]['fis']*1e-24
-                abs_xs = DATA[iso]['cap']*1e-24 + fis_xs
                 macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
-                macro_abs = abs_xs*conc[i]/nucname.anum(iso)*MOL
 
                 nubar = 3.1
                 numerator += nubar*macro_fis
-                denom += macro_abs
 
     kinf = numerator/denom
     return kinf
