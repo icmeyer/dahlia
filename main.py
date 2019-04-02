@@ -6,7 +6,8 @@ from scipy.constants import physical_constants
 # from solver import solve_matrix
 from plotting import concentration_plot
 
-from data import FAST_DATA, THERMAL_DATA, YR2S, INV_YR2S, MOL, EV2JOULE
+from data_nu import FAST_DATA, THERMAL_DATA, YR2S, INV_YR2S, MOL, EV2JOULE
+from tools import convert_to_weight_percent, convert_to_number_percent
 
 
 use_pyne = True
@@ -14,12 +15,15 @@ if use_pyne:
     from pyne import data, nucname
 
 # Note: Isotopes must be listed by ascending Z and then ascending A
-def main_function(isotopes, conc, flux, reactor_type, years, steps,
-                  fixed_flux=False):
+def main_function(isotopes, conc, reactor_type, years, steps,
+                  fixed_flux=False, depletion_percent = 100):
     if reactor_type=='fast':
         DATA = FAST_DATA
     elif reactor_type=='thermal':
         DATA = THERMAL_DATA
+
+    # Input data is weight percent, convert to atom percent
+    conc = convert_to_number_percent(isotopes, conc)
 
     fluxes = []
     flux = evaluate_flux(isotopes, conc, DATA, fixed_flux)
@@ -28,12 +32,12 @@ def main_function(isotopes, conc, flux, reactor_type, years, steps,
     depletion_matrix = np.zeros([len(isotopes)+2, len(isotopes)+2])
     
     flux_depletion = calc_flux_depletion(isotopes, flux, DATA)
-    print('Flux depletion matrix')
-    print(flux_depletion)
+    # print('Flux depletion matrix')
+    # print(flux_depletion)
     
     decay_depletion = calc_decay_depletion(isotopes, DATA)
-    print('Decay Depletion matrix')
-    print(decay_depletion)
+    # print('Decay Depletion matrix')
+    # print(decay_depletion)
 
     # plt.subplot(121)
     # plt.spy(flux_depletion)
@@ -56,12 +60,18 @@ def main_function(isotopes, conc, flux, reactor_type, years, steps,
     conc_over_time[:, 0] = conc
     for i in range(steps-1):
         conc = matrix_exp_solve(depletion_matrix, dt, conc)
+        # conc_over_time[:, i+1] = convert_to_weight_percent(isotopes, conc)
         conc_over_time[:, i+1] = conc
         # print('flux evaluation')
         flux = evaluate_flux(isotopes, conc, DATA, fixed_flux)
         fluxes.append(flux)
         ks.append(evaluate_kinf(isotopes, conc, DATA, reactor_type))
         depletion_matrix = calc_flux_depletion(isotopes, flux, DATA) + decay_depletion
+        # Assumes last index is FPs!
+        if conc[-1]*100 >= depletion_percent:
+            last_entry = i+2
+            conc_over_time = conc_over_time[:, 0:last_entry]
+            break
 
     return conc_over_time, fluxes, ks
 
@@ -77,6 +87,7 @@ def calc_decay_depletion(isotopes, DATA):
         for j, iso_j in enumerate(isotopes):
             # Off-diagonal terms
             if j < i or j > i:
+                # if j < i:
                 ratio = data.branch_ratio(iso_j, iso_i)
                 # print('print(iso_j, iso_i, ratio)')
                 # print(iso_j, iso_i, ratio)
@@ -86,8 +97,8 @@ def calc_decay_depletion(isotopes, DATA):
                     dec_depletion[i,j] -= ratio*decay_const 
                     daughter_flags[iso_j] = True
 
-                if iso_j=='932340':
-                    print(iso_j, iso_i, data.branch_ratio(iso_j,iso_i))
+                # if iso_j=='932340':
+                #     print(iso_j, iso_i, data.branch_ratio(iso_j,iso_i))
 
             # Diagonal terms
             elif i == j:
@@ -183,35 +194,13 @@ def evaluate_kinf(isotopes, conc, DATA, reactor_type):
         except: 
             continue
 
-        if reactor_type == 'thermal':
-            if iso == '922350':
-                fis_xs = DATA[iso]['fis']*1e-24
-                macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
-
-                nubar = 2.4
-                numerator += nubar*macro_fis
-
-            elif iso == '942390':
-                fis_xs = DATA[iso]['fis']*1e-24
-                macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
-
-                nubar = 2.9
-                numerator += nubar*macro_fis
-
-        elif reactor_type == 'fast':
-            if iso == '922350' or iso =='922380':
-                fis_xs = DATA[iso]['fis']*1e-24
-                macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
-
-                nubar = 2.6
-                numerator += nubar*macro_fis
-
-            elif iso == '942390':
-                fis_xs = DATA[iso]['fis']*1e-24
-                macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
-
-                nubar = 3.1
-                numerator += nubar*macro_fis
+        try:
+            fis_xs = DATA[iso]['fis']*1e-24
+            nubar = DATA[iso]['nubar']
+            macro_fis = fis_xs*conc[i]/nucname.anum(iso)*MOL
+            numerator += nubar*macro_fis
+        except:
+            continue
 
     kinf = numerator/denom
     return kinf

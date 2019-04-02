@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 
 font = {'weight' : 'bold',
-        'size'   : 13}
+        'size'   : 11}
 rc('font', **font)
 rc('text', usetex=True)
 
@@ -22,11 +22,16 @@ def concentration_plot(isotopes, time, steps, conc_over_time, title):
         plt.title(title)
         plt.show()
 
-def concentration_subplot(isotopes, time, steps, conc_over_time, title):
+def concentration_subplot(isotopes, time, steps, conc_over_time, title,
+                          PuAmCm_only = False):
         times = np.linspace(0, time, steps)
         # n_plots = U, Np, Pu, Am, Cm
         # 92 U, 93 Np, 94 Pu, 95 Am, 96 Cm
         iso_one_letter = ['U', 'N', 'P', 'A', 'C', 'O'] # O is for other
+        columns = 2
+        if PuAmCm_only:
+            iso_one_letter = ['P', 'A', 'C', 'O']
+            columns = 1
         n_plots = len(iso_one_letter)
         plot_axes = {}
         plot_legends = {}
@@ -34,7 +39,7 @@ def concentration_subplot(isotopes, time, steps, conc_over_time, title):
         # fig, axarr = plt.subplots(int(n_plots/2), 2)
         for letter in iso_one_letter:
             count += 1
-            plot_axes[letter] = plt.subplot(int(n_plots/2), 2, count)
+            plot_axes[letter] = plt.subplot(int(n_plots/2), columns, count)
             plot_legends[letter] = []
         
         for i, iso in enumerate(isotopes):
@@ -56,6 +61,61 @@ def concentration_subplot(isotopes, time, steps, conc_over_time, title):
 
         plt.xlabel('Time (y)')
         plt.show()
+
+def concentration_subplot_bypercent(isotopes, steps, conc_over_time, title,
+                                    PuAmCm_only = False):
+        burns = np.linspace(0, conc_over_time[-1,-1], len(conc_over_time[1,:]))
+        # n_plots = U, Np, Pu, Am, Cm
+        # 92 U, 93 Np, 94 Pu, 95 Am, 96 Cm
+        iso_one_letter = ['U', 'N', 'P', 'A', 'C', 'O'] # O is for other
+        columns = 2
+        if PuAmCm_only:
+            iso_one_letter = ['P', 'A', 'C', 'O']
+            columns = 1
+        n_plots = len(iso_one_letter)
+        plot_axes = {}
+        plot_legends = {}
+        count = 0
+        # fig, axarr = plt.subplots(int(n_plots/2), 2)
+        for letter in iso_one_letter:
+            count += 1
+            plot_axes[letter] = plt.subplot(n_plots, columns, count)
+            plot_legends[letter] = []
+        
+        for i, iso in enumerate(isotopes):
+            dont_plot = ['U', 'N']
+            if iso[0] in dont_plot:
+                continue
+            try: 
+                ax = plot_axes[iso[0]]
+                ax.semilogy(burns, conc_over_time[i, :], label=iso)
+                plot_legends[iso[0]].append(iso)
+                # plt.plot(times, conc_over_time[i, :])
+            except:
+                ax = plot_axes['O']
+                ax.semilogy(burns, conc_over_time[i, :], label=iso)
+                plot_legends['O'].append(iso)
+                continue
+
+        for letter in iso_one_letter:
+            ax = plot_axes[letter]
+            # ax.legend(plot_legends[letter])
+            ax.legend(bbox_to_anchor=(1.04,0), loc='lower left', ncol=1)
+            ax.grid(True)
+
+        plt.xlabel('Depletion (atom percent)')
+        plt.show()
+
+def plot_k_comparison(mix_ratios, avg_k_fresh, avg_ks, title=''):
+    fresh_k_array = np.ones(len(mix_ratios))*avg_k_fresh
+    plt.plot(mix_ratios*100, fresh_k_array)
+    plt.plot(mix_ratios*100, avg_ks)
+    plt.grid(True)
+    plt.xlabel('Percent Pu/Am/Cm (100 - Percent Natural Uranium )')
+    plt.ylabel('Avg $k_{inf}$')
+    plt.title(title)
+    plt.legend(['Fresh Fuel', 'MOX Mixtures'])
+    plt.show()
         
 def flux_k_plot(time, steps, fluxes, ks):
     plt.subplot(2,1,1)

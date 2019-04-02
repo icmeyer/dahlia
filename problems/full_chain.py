@@ -11,7 +11,6 @@ burnup_plot = True
 estimate_convergence = False
 calculate_post_burnup = True
 
-
 isotopes = ['922330', '922340', '922350', '922360', '922370', '922380', '922390',
                       '932340', '932350', '932360', '932370', '932380', '932390', '932400',
                                 '942350', '942360', '942370', '942380', '942390', '942400', '942410', '942420', '942430',
@@ -33,7 +32,7 @@ conc[5] = 0.95
 flux = 0
 years = 60 / (35*1e-6*1e3) / 365.25 # MWd/kg / W/g * MW/W * g/kg / days/year
 steps = int(1e3)
-reactor_type = 'fast'
+reactor_type = 'thermal'
 conc_over_time, fluxes, ks = main_function(isotopes, conc, flux, reactor_type, years, steps)
 
 data = np.vstack([np.array(iso_names), conc*100, conc_over_time[:,-1]*100])

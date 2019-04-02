@@ -7,8 +7,9 @@ YR2S = year
 INV_YR2S = 1/YR2S
 
 
-THERMAL_DATA = {'922350': {'fis':  38.8  ,  # Uranium
-                           'cap':  8.7  },
+THERMAL_DATA = {'922350': {'fis':  38.8,   # Uranium
+                           'cap':  8.7,
+                           'nubar': 2.4},
                 '922380': {'fis':  0.103, 
                            'cap':  0.86 },
                 '932370': {'fis':  0.52 ,  # Neptunium
@@ -17,8 +18,9 @@ THERMAL_DATA = {'922350': {'fis':  38.8  ,  # Uranium
                            'cap':  13.6 },
                 '942380': {'fis':  2.4  ,  # Plutonium
                            'cap':  27.7 },
-                '942390': {'fis':  102  , 
-                           'cap':  58.7 },
+                '942390': {'fis':  102, 
+                           'cap':  58.7,
+                           'nubar': 2.9},
                 '942400': {'fis':  0.53 , 
                            'cap':  210.2},
                 '942410': {'fis':  102.2 , 
@@ -44,7 +46,8 @@ THERMAL_DATA = {'922350': {'fis':  38.8  ,  # Uranium
                 }
 
 FAST_DATA = {'922350': {'fis':  1.98,  # Uranium
-                        'cap':  0.57},
+                        'cap':  0.57,
+                        'nubar': 2.6},
              '922380': {'fis':  0.04, 
                         'cap':  0.30},
              '932370': {'fis':  0.32,  # Neptunium
@@ -54,7 +57,8 @@ FAST_DATA = {'922350': {'fis':  1.98,  # Uranium
              '942380': {'fis':  1.1 ,  # Plutonium
                         'cap':  0.58},
              '942390': {'fis':  1.86, 
-                        'cap':  0.56},
+                        'cap':  0.56,
+                        'nubar': 3.1},
              '942400': {'fis':  0.36, 
                         'cap':  0.57},
              '942410': {'fis':  2.49, 
